@@ -27,7 +27,7 @@ public class MyFirst2Da
     VertexArray vArray;
     Transform transform;
     int maxVerts = 2048;                        // max. Anzahl Vertices im Vertex-Array
-    float s = 1.2f;                             // Dreiecksseite
+    float s = 1.2f*.5f;                             // Dreiecksseite
     float h = 0.5f*s*(float)Math.sqrt(3);       // Hoehe
     float phi = 0;                              // Drehwinkel
     float dphi = 1.0f;                          // Zunahme Drehwinkel
@@ -97,7 +97,9 @@ public class MyFirst2Da
        transform.resetM(gl);                // Objekt-System zuruecksetzen
        vArray.drawAxis(gl,5,5,5);           // Koordinatenachsen zeichnen
        float s2 = 0.5f*s;
+       transform.translateM(gl,0,0,-.9f);
        transform.rotateM(gl,phi,0,0,1);     // Objekt-System drehen
+        transform.translateM(gl, .8f, 0,0 );
        zeichneDreieck(gl,vArray,-s2,-h/3,s2,-h/3,0,2*h/3);
        phi += dphi;
     }

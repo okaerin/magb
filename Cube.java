@@ -4,7 +4,7 @@ import java.awt.event.*;
 import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.*;
 
-public class MyFirstGL
+public class Cube
        implements WindowListener, GLEventListener
 {
     //  ---------  globale Daten  ---------------------------
@@ -16,7 +16,7 @@ public class MyFirstGL
 
  //  ---------  Methoden  --------------------------------
 
-    public MyFirstGL()    // Konstruktor
+    public Cube()    // Konstruktor
     { createFrame();
     }
 
@@ -69,7 +69,7 @@ public class MyFirstGL
     //  -----------  main-Methode  ---------------------------
 
     public static void main(String[] args)
-    { new MyFirstGL();
+    { new Cube();
     }
 
     //  ---------  Window-Events  --------------------
