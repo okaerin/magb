@@ -3,6 +3,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import ch.fhnw.util.math.Vec3;
 import ch.fhnw.util.opengl.MyShaders;
@@ -23,8 +24,12 @@ public class Spiral
     int maxVerts = 2048;                        // max. Anzahl Vertices im Vertex-Array
     private int programId;
     private Transform transform;
-    private int azimut = 0;
-    private int elevation = 0;
+    private int azimut = 45;
+    private int elevation = 30;
+    float xleft = -3f, xright = 3f;//viewing volume
+    private float ybottom, ytop;
+    private float znear = -.1f, zfar = 100;
+    private float dist = 8f;
 
     //  ---------  Methoden  --------------------------------
 
@@ -68,51 +73,61 @@ public class Spiral
 
     @Override
     public void display(GLAutoDrawable drawable) {
+        //not potato
         GL3 gl = drawable.getGL().getGL3();
 
         // -----  Sichtbarkeitstest
         gl.glEnable(GL3.GL_DEPTH_TEST);
-        // -----  Color-Buffer loeschen
-        gl.glClear(gl.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_CLEAR_VALUE);
 
-        //kamera system
-        transform.lookAt2(gl, 8, azimut, elevation);
-//        transform.setLightPosition(gl, -1f, 3f, -1f);
+        // -----  Color- und Depth-Buffer loeschen
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 
-        //coordinates
-//        transform.resetM(gl);
-//        transform.perspective(gl,0f, windowWidth, 0, windowHeight, .01f,100f);
-//        transform.translateM(gl, 0, 0, -5);
-        vArray.setColor(1, 1, 1);
+        // -----  Kamera-System und Lichtquelle festlegen
+        transform.lookAt2(gl, dist, azimut, elevation);
+        transform.setLightPosition(gl, -1.0f, 2.7f, -1.0f);
+
+        // -----  Koordinatenachsen zeichnen
+        vArray.setColor(.8f, .8f, .8f);
         vArray.drawAxis(gl, 5, 5, 5);
-
         //draw helix
-//        float t = .0f;
-//        float dt = .1f;
-//        ArrayList<Vec3> verts = new ArrayList<>();
-//        for (int i = 0; i < 35 * 5 * 2; i++, t += dt) {
-//            //r(t) = 1− 0.02 · t
-//            float rt = 1 - .02f * t;
-//            //x(t) = r(t) · sin(t)
-//            float xt = (float) (rt * Math.sin(t));
-//            //y(t) = 0.03 · t
-//            float yt = .03f * t;
-//            //z(t) = r(t) · cos(t)
-//            float zt = (float) (rt * Math.cos(t));
-//
-//            verts.add(new Vec3(xt, yt, zt));
-//        }
-//        vArray.setColor(1, 0, 0);
-//        vArray.drawLine(gl, verts.toArray(Vec3[]::new));
-    }
+        float t = .0f;
+        float dt = .1f;
+        ArrayList<Vec3> verts = new ArrayList<>();
+        for (int i = 0; i < 35 * 5 * 2; i++, t += dt) {
+            //r(t) = 1− 0.02 · t
+            float rt = 1 - .02f * t;
+            //x(t) = r(t) · sin(t)
+            float xt = (float) (rt * Math.sin(t));
+            //y(t) = 0.03 · t
+            float yt = .03f * t;
+            //z(t) = r(t) · cos(t)
+            float zt = (float) (rt * Math.cos(t));
 
+            verts.add(new Vec3(xt, yt, zt));
+        }
+        vArray.setColor(1, 0, 0);
+        drawLine(gl, verts.toArray(Vec3[]::new));
+    }
+    public void drawLine(GL3 gl, Vec3[] arr){
+        if(arr==null||arr.length<1)throw new IllegalArgumentException();
+        vArray.rewindBuffer(gl);
+        Arrays.stream(arr)
+                .forEach(vert-> vArray.putVertex(vert.x, vert.y, vert.z));
+        vArray.copyBuffer(gl);
+        vArray.drawArrays(gl, GL3.GL_LINE_STRIP);
+    }
 
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y,
                         int width, int height) {
         GL3 gl = drawable.getGL().getGL3();
-        // Set the viewport to be the entire window
+        // ------  Set the viewport to the entire window
         gl.glViewport(0, 0, width, height);
+        float aspect = (float) height / width;
+        ybottom = aspect * xleft;
+        ytop = aspect * xright;
+        // ------ Projektionsmatrix (Orthogonalprojektion)
+        transform.ortho(gl, xleft, xright, ybottom, ytop, znear, zfar);
     }
 
 
@@ -174,7 +189,7 @@ public class Spiral
                 elevation--;
                 break;
         }
-        System.out.println("elevation: "+elevation+" azimut: "+azimut);
+        System.out.println("elevation: " + elevation + " azimut: " + azimut);
         canvas.repaint();
     }
 
