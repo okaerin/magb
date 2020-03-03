@@ -92,8 +92,9 @@ public class Spiral
         //draw helix
         float t = .0f;
         float dt = .1f;
+        int nPunkte = (int) (35/dt);
         ArrayList<Vec3> verts = new ArrayList<>();
-        for (int i = 0; i < 35 * 5 * 2; i++, t += dt) {
+        for (int i = 0; i < nPunkte; i++, t += dt) {
             //r(t) = 1− 0.02 · t
             float rt = 1 - .02f * t;
             //x(t) = r(t) · sin(t)
