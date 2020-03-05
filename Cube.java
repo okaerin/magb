@@ -90,8 +90,11 @@ public class Cube
         transform.setLightPosition(gl, -1.0f, 2.7f, -1.0f);
 
         // -----  Koordinatenachsen zeichnen
+        transform.setShadingLevel(gl, 0);
         drawAxisColored(gl, 5, 5, 5);
         //draw cube
+        transform.setShadingLevel(gl, 1);
+        transform.setLightPosition(gl, 0, 0, 10);
 //        vArray.setColor(224 / 255.f, 155 / 255.f, 142 / 255.f);
         draw(gl);
     }
