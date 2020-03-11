@@ -22,7 +22,7 @@ public class Ikosaeder
     Frame frame;
     GLCanvas canvas;      // OpenGL Window
     VertexArray vArray;
-    int maxVerts = 2048;                        // max. Anzahl Vertices im Vertex-Array
+    int maxVerts = (int) 1e5;                        // max. Anzahl Vertices im Vertex-Array
     private int programId;
     private Transform transform;
     private int azimut = 45;
@@ -49,7 +49,7 @@ public class Ikosaeder
                     {Z, -X, 0.f},
                     {-Z, -X, 0.f}
             };
-
+    final int subdivisions;
     final int[][] tindices =
             {
                     {0, 1, 4},
@@ -77,8 +77,9 @@ public class Ikosaeder
 
 //  ---------  Methoden  --------------------------------
 
-    public Ikosaeder()   // Konstruktor
+    public Ikosaeder(int subdivisions)   // Konstruktor
     {
+        this.subdivisions = subdivisions;
         createFrame();
     }
 
@@ -163,10 +164,19 @@ public class Ikosaeder
             float[] vf0 = vdata[tindices[i][0]];
             float[] vf1 = vdata[tindices[i][1]];
             float[] vf2 = vdata[tindices[i][2]];
-
-//            putTriangle(gl, new Vec3(vf0), new Vec3(vf1), new Vec3(vf2));
-            //singular subdivide
-            subdivide(gl,new Vec3(vf0), new Vec3(vf1), new Vec3(vf2));
+            switch (subdivisions) {
+                case 0:
+                    putTriangle(gl, new Vec3(vf0), new Vec3(vf1), new Vec3(vf2));
+                    break;
+                case 1:
+                    //singular subdivide
+                    subdivide(gl, new Vec3(vf0), new Vec3(vf1), new Vec3(vf2));
+                    break;
+                default:
+                    //recursive subvidive
+                    subdivide(gl, new Vec3(vf0), new Vec3(vf1), new Vec3(vf2), subdivisions);
+                    break;
+            }
         }
         vArray.copyBuffer(gl);
         vArray.drawArrays(gl, gl.GL_TRIANGLES);
@@ -182,6 +192,26 @@ public class Ikosaeder
         putTriangle(gl, B, v23, v12);
         putTriangle(gl, C, v31, v23);
         putTriangle(gl, v12, v23, v31);
+    }
+
+    void subdivide(GL3 gl, Vec3 A, Vec3 B, Vec3 C, long depth) {
+        Vec3 v12 = new Vec3(0, 0, 0), v23 = new Vec3(0, 0, 0), v31 = new Vec3(0, 0, 0);
+        if (depth == 0) {
+            putTriangle(gl, A, B, C);
+            return;
+        }
+        v12 = A.add(B).normalize();
+        v23 = B.add(C).normalize();
+        v31 = C.add(A).normalize();
+        subdivide(gl, A, v12, v31, depth - 1);
+        subdivide(gl, B, v23, v12, depth - 1);
+        subdivide(gl, C, v31, v23, depth - 1);
+        subdivide(gl, v12, v23, v31, depth - 1);
+//
+//        putTriangle(gl, A, v12, v31);
+//        putTriangle(gl, B, v23, v12);
+//        putTriangle(gl, C, v31, v23);
+//        putTriangle(gl, v12, v23, v31);
     }
 
     void putTriangle(GL3 gl, Vec3 A, Vec3 B, Vec3 C) {
@@ -216,7 +246,7 @@ public class Ikosaeder
 //  -----------  main-Methode  ---------------------------
 
     public static void main(String[] args) {
-        new Ikosaeder();
+        new Ikosaeder(5);
     }
 
 //  ---------  Window-Events  --------------------
