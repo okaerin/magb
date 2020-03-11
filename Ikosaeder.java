@@ -163,20 +163,23 @@ public class Ikosaeder
             float[] vf0 = vdata[tindices[i][0]];
             float[] vf1 = vdata[tindices[i][1]];
             float[] vf2 = vdata[tindices[i][2]];
-            Vec3 A = new Vec3(vf0), B = new Vec3(vf1), C = new Vec3(vf2);
-            Vec3 BA = A.subtract(B), BC = C.subtract(B);
-            Vec3 normal = BC.cross(BA);
-            vArray.setNormal(normal.x, normal.y, normal.z);
 
-
-            vArray.putVertex(A.x, A.y, A.z);
-            vArray.putVertex(B.x, B.y, B.z);
-            vArray.putVertex(C.x, C.y, C.z);
-
+            putTriangle(gl, new Vec3(vf0), new Vec3(vf1), new Vec3(vf2));
         }
         vArray.copyBuffer(gl);
         vArray.drawArrays(gl, gl.GL_TRIANGLES);
     }
+
+    void putTriangle(GL3 gl, Vec3 A, Vec3 B, Vec3 C) {
+        Vec3 BA = A.subtract(B), BC = C.subtract(B);
+        Vec3 normal = BC.cross(BA);
+        vArray.setNormal(normal.x, normal.y, normal.z);
+
+        vArray.putVertex(A.x, A.y, A.z);
+        vArray.putVertex(B.x, B.y, B.z);
+        vArray.putVertex(C.x, C.y, C.z);
+    }
+
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y,
                         int width, int height) {
