@@ -164,10 +164,24 @@ public class Ikosaeder
             float[] vf1 = vdata[tindices[i][1]];
             float[] vf2 = vdata[tindices[i][2]];
 
-            putTriangle(gl, new Vec3(vf0), new Vec3(vf1), new Vec3(vf2));
+//            putTriangle(gl, new Vec3(vf0), new Vec3(vf1), new Vec3(vf2));
+            //singular subdivide
+            subdivide(gl,new Vec3(vf0), new Vec3(vf1), new Vec3(vf2));
         }
         vArray.copyBuffer(gl);
         vArray.drawArrays(gl, gl.GL_TRIANGLES);
+    }
+
+    void subdivide(GL3 gl, Vec3 A, Vec3 B, Vec3 C) {
+        Vec3 v12 = new Vec3(0, 0, 0), v23 = new Vec3(0, 0, 0), v31 = new Vec3(0, 0, 0);
+        v12 = A.add(B).normalize();
+        v23 = B.add(C).normalize();
+        v31 = C.add(A).normalize();
+
+        putTriangle(gl, A, v12, v31);
+        putTriangle(gl, B, v23, v12);
+        putTriangle(gl, C, v31, v23);
+        putTriangle(gl, v12, v23, v31);
     }
 
     void putTriangle(GL3 gl, Vec3 A, Vec3 B, Vec3 C) {
